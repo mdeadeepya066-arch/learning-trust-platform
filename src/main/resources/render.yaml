@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: learning-trust-backend
+    env: java
+    plan: free
+    buildCommand: ./mvnw clean install
+    startCommand: java -jar target/*.jar
+    envVars:
+      - key: SERVER_PORT
+        value: 8080
