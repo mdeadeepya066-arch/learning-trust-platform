@@ -1,14 +1,25 @@
-# Step 1: Build the app
-FROM maven:3.9.6-eclipse-temurin-17 AS build
+# Use Java 17
+FROM eclipse-temurin:17-jdk
+
+# Set working directory
 WORKDIR /app
-COPY . .
-RUN chmod +x mvnw
+
+# Copy Maven wrapper and pom
+COPY pom.xml .
+COPY mvnw .
+COPY .mvn .mvn
+
+# Download dependencies
+RUN chmod +x mvnw && ./mvnw dependency:go-offline
+
+# Copy source code
+COPY src src
+
+# Build the application
 RUN ./mvnw clean package -DskipTests
 
-# Step 2: Run the jar
-FROM eclipse-temurin:17-jdk
-WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+# Expose Render port
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=${PORT}"]
 
+# Run the jar
+CMD ["sh", "-c", "java -jar target/*.jar"]
